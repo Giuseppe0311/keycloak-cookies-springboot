@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: keycloack-cookies
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/test_realm
+
+keycloak:
+  client-id: test_client
+  client-secret: XL0XBJmANaUuEDlQdXXkBinc2GbWWzrl
+  grant-type: client_credentials
+  realm: test_realm
+  server-url: http://localhost:8090
+
+jwt:
+  auth:
+    converter:
+      principle-attribute: preferred_username
+      resource-id: test_client

@@ -1,0 +1,42 @@
+services:
+  #  database-router:
+  #    image: database-router-image
+  #    ports:
+  #      - "8080:8080"
+
+  postgres-db:
+    image: 'postgres:16.0'
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-start-db}
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret}
+    volumes:
+      - postgres_data_db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.4
+    command: start --import-realm
+    depends_on:
+      - postgres-db
+    ports:
+      - "8090:8080"
+    environment:
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
+      KC_HOSTNAME_PORT: ${KC_HOSTNAME_PORT:-8090}
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-user}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-secret}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-db:${POSTGRES_PORT:-5432}/keycloakstartdb
+      KC_DB_USERNAME: ${POSTGRES_USER:-user}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+#    volumes:
+#      - ./backup-complete.json:/opt/keycloak/data/import/backup.json
+
+volumes:
+  postgres_data_db:
